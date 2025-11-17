@@ -1,0 +1,31 @@
+{
+  "width": 14,
+  "height": 9,
+  "entities": {
+    "players": [
+      { "position": [2, 7] }
+    ],
+    "metal_boxes": [
+    ],
+    "walls": [
+    ],
+    "goals": [
+        {"position": [11, 1]}
+    ],
+    "lavas": [
+        {"position": [0, 8]}
+    ],
+    "waters": [
+        {"position": [13, 0]}
+    ],
+    "portal_orbs": [
+
+    ],
+    "cracked_walls": [
+        
+    ],
+    "timed_doors": [
+
+    ]
+  }
+}
