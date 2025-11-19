@@ -6,7 +6,6 @@ from core.board import Board
 from core.entities import Player
 from core.engine import GameEngine
 from core.evaluator import GameEvaluator
-from core.search import GameSearch
 
 
 @dataclass(frozen=True)
@@ -65,20 +64,29 @@ class GameState:
         )
 
     def __hash__(self) -> int:
-        return GameSearch.state_hash(self.board, self.phase, self.move_count)
+        board_hash = hash(
+            (
+                self.board.width,
+                self.board.height,
+                tuple(sorted(self.board.entities.keys())),
+                tuple(
+                    (pos, tuple(sorted(ents)))
+                    for pos, ents in sorted(self.board.position_map.items())
+                ),
+                self.board.player_id,
+            )
+        )
+        return hash((board_hash, self.phase, self.move_count))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
             return False
-        return GameSearch.states_equal(
-            self.board,
-            self.phase,
-            self.move_count,
-            other.board,
-            other.phase,
-            other.move_count,
+        return (
+            self.board.width == other.board.width
+            and self.board.height == other.board.height
+            and self.board.entities == other.board.entities
+            and self.board.position_map == other.board.position_map
+            and self.board.player_id == other.board.player_id
+            and self.phase == other.phase
+            and self.move_count == other.move_count
         )
-
-    def heuristic(self) -> float:
-        """Heuristic for A* and other informed search algorithms."""
-        return GameSearch.heuristic(self.board, self.phase)
