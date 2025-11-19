@@ -1,6 +1,6 @@
 from core.board import Board
-from core.entities import Goal, Wall
-from core.observers import Observer
+from core.entitiy import Goal, Wall
+from core.observer import Observer
 from utils.types import GamePhase
 
 

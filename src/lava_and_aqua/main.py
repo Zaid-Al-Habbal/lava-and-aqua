@@ -1,6 +1,6 @@
 from collections import deque
 from core.state import GameState
-from core.actions import MoveAction
+from core.action import MoveAction
 from core.game_manager import GameManager
 from utils.types import Direction
 from utils.level_loader import LevelLoader

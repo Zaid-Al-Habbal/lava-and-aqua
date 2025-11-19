@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Any
-from core.actions import MoveAction
+from core.action import MoveAction
 from utils.types import GamePhase
 from core.board import Board
-from core.entities import Player
+from core.entitiy import Player
 from core.engine import GameEngine
 from core.evaluator import GameEvaluator
 

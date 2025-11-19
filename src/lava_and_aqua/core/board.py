@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Any
 from utils.constants import FLUID_ENTITIES
 from utils.types import Coordinate, Direction, EntityType, EntityId
-from core.entities import (
+from core.entitiy import (
     CrackedWall,
     Lava,
     Orb,
@@ -218,11 +218,11 @@ class Board:
         return board
 
     def tick_TIMED_DOORs(self) -> "Board":
-        from core.observers import Observer
+        from core.observer import Observer
 
         return Observer.tick_timed_doors(self)
 
     def spread_lava_and_water(self) -> "Board":
-        from core.observers import Observer
+        from core.observer import Observer
 
         return Observer.spread_lava_and_water(self)

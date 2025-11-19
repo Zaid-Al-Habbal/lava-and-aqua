@@ -1,6 +1,6 @@
 from core.board import Board
-from core.entities import Entity, GameEntity, Player, Position
-from core.actions import MoveAction
+from core.entitiy import Entity, GameEntity, Player, Position
+from core.action import MoveAction
 from utils.types import EntityType, EntityId, Direction
 from utils.constants import SOLID_OBSTACLES, BLOCKING_ENTITIES, PASSABLE_WITH_FLUID
 

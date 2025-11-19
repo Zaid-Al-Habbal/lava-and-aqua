@@ -1,7 +1,7 @@
 from core.board import Board
-from core.actions import MoveAction
+from core.action import MoveAction
 from core.evaluator import GameEvaluator
-from core.observers import Observer
+from core.observer import Observer
 from utils.types import GamePhase, Direction
 
 

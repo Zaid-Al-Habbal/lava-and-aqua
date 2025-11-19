@@ -49,7 +49,7 @@ def render_grid_state(board, position_map, entities) -> list[list[str]]:
             grid[y][x] = "🚧"
 
         elif EntityType.TIMED_DOOR in entity_types:
-            from core.entities import TimedDoor
+            from core.entitiy import TimedDoor
 
             for ent_id in ents:
                 entity = entities[ent_id]
