@@ -20,13 +20,11 @@ def choose_level() -> str:
     for idx, fname in enumerate(level_files):
         print(f"  {idx + 1}. {fname}")
     while True:
-        choice = input("Choose a level by number or name: ").strip()
+        choice = input("Choose a level by number: ").strip()
         if choice.isdigit():
             idx = int(choice) - 1
             if 0 <= idx < len(level_files):
                 return os.path.join(levels_dir, level_files[idx])
-        elif choice in level_files:
-            return os.path.join(levels_dir, choice)
         print("Invalid choice. Try again.")
 
 

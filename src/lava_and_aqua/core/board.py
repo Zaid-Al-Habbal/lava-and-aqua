@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any
-from utils.types import Coordinate, EntityType, EntityId
+from utils.constants import FLUID_ENTITIES
+from utils.types import Coordinate, Direction, EntityType, EntityId
 from core.entities import (
     CrackedWall,
     Lava,
@@ -175,6 +176,46 @@ class Board:
 
     def get_entities_by_type(self, entity_type: EntityType) -> list[GameEntity]:
         return [e for e in self.entities.values() if e.entity_type == entity_type]
+    
+    def apply_move(self, player: Player, direction: Direction) -> "Board":
+        target_pos = player.position.move(direction.dx, direction.dy)
+        entities_at_target = self.get_entities_at(target_pos)
+
+        board = self
+
+        if entities_at_target is None or len(entities_at_target) == 0:
+            pass  
+        else:
+            box = None
+            for entBox in entities_at_target:
+                if isinstance(entBox, MetalBox):
+                    box = entBox
+                    break
+            if box is not None:
+                box_target = target_pos.move(direction.dx, direction.dy)
+                entity_behind_box = board.get_entities_at(box_target)
+
+                if entity_behind_box is not None:
+                    for ent in entity_behind_box:
+                        if ent.entity_type in FLUID_ENTITIES:
+                            board = board.remove_entity(ent.entity_id)
+
+                moved_box = entities_at_target[0].move_to(box_target)
+                board = board.update_entity(moved_box)
+
+            orb = None
+            for entOrb in entities_at_target:
+                if isinstance(entOrb, Orb):
+                    orb = entOrb
+                    break
+            if orb is not None:
+                player = player.collect_orb(orb.entity_id)
+                board = board.remove_entity(orb.entity_id)
+
+        moved_player = player.move_to(target_pos)
+        board = board.update_entity(moved_player)
+
+        return board
 
     def tick_TIMED_DOORs(self) -> "Board":
         from core.observers import Observer
