@@ -81,12 +81,4 @@ class GameState:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
             return False
-        return (
-            self.board.width == other.board.width
-            and self.board.height == other.board.height
-            and self.board.entities == other.board.entities
-            and self.board.position_map == other.board.position_map
-            and self.board.player_id == other.board.player_id
-            and self.phase == other.phase
-            and self.move_count == other.move_count
-        )
+        return self.__hash__() == other.__hash__()
