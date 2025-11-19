@@ -195,13 +195,13 @@ main.py
      │
      ├─ GameState.update_state()
      │   └─ GameEngine.apply_action()
-     │      ├─ apply_move()
+     │      ├─ board.apply_move()
      │      │  ├─ Collision detection
      │      │  ├─ Orb collection
      │      │  └─ Metal box pushing
-     │      ├─ spread_lava_and_water()
-     │      ├─ tick_TIMED_DOORs()
-     │      └─ GameEvaluator checks terminal state
+     │      ├─ board.spread_lava_and_water()
+     │      ├─ boardtick_TIMED_DOORs()
+     │      └─ GameEvaluator.is_terminal
      │
      ├─ GameManager.add_state() (history)
      │
@@ -381,7 +381,7 @@ MetalBox, Wall, Goal, Lava, Water, Orb, CrackedWall
 - Trigger spread mechanics
 - Check terminal conditions
 
-### Observer (`core/observers.py`)
+### Observer (`core/observer.py`)
 **Implements game mechanics and collision logic**
 
 **Responsibilities**:
