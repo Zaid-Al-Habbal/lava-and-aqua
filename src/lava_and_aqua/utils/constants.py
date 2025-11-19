@@ -5,10 +5,6 @@ DEFAULT_BOARD_WIDTH = 20
 DEFAULT_BOARD_HEIGHT = 15
 
 
-# Portal orbs
-MUST_COLLECT_ALL_ORBS = True  # Player must collect all portal orbs to win
-
-
 BLOCKING_ENTITIES = {
     EntityType.WALL,
     EntityType.TIMED_DOOR,
