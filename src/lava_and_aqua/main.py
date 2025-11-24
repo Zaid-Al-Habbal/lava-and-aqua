@@ -1,4 +1,5 @@
 from collections import deque
+from copy import deepcopy
 from core.state import GameState
 from core.action import MoveAction
 from core.game_manager import GameManager
@@ -48,9 +49,9 @@ def interactive_demo() -> None:
     print("  u - Undo last move")
     print("  q - Exit demo")
     print()
+    print_board(game_state)
     while True:
         print()
-        print_board(game_state)
         print()
         print("You Available actions:",
             ", ".join([action.direction.name for action in game_state.get_available_actions()]))    
@@ -66,7 +67,7 @@ def interactive_demo() -> None:
             continue
         elif command == "u":
             
-            if game_state.__eq__(initial_state) is False:
+            if len(GameManager.game_states) > 1:
                 GameManager.remove_last_state()
                 game_state = GameManager.game_states[-1]
                 print("\nUndid last move!")
@@ -92,7 +93,7 @@ def interactive_demo() -> None:
             game_state = game_state.update_state(action)
             print()
             print_board(game_state)
-            GameManager.add_state(game_state)
+            GameManager.add_state(deepcopy(game_state))
             if game_state.is_won():
                 print(
                     "🎉 Congratulations! You collected all orbs and reached the goal! 🎉 \n"

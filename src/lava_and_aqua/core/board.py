@@ -1,4 +1,3 @@
-from dataclasses import dataclass, field
 from typing import Any
 from utils.constants import FLUID_ENTITIES
 from utils.types import Coordinate, Direction, EntityType, EntityId
@@ -17,38 +16,28 @@ from core.entitiy import (
 )
 
 
-@dataclass(frozen=True)
 class Board:
-    width: int
-    height: int
-    entities: dict[EntityId, GameEntity] = field(default_factory=dict)
-    position_map: dict[Coordinate, list[EntityId]] = field(default_factory=dict)
-    player_id: EntityId | None = None
-
-    def __post_init__(self) -> None:
-        new_position_map: dict[Coordinate, list[EntityId]] = {}
-        for entity_id, entity in self.entities.items():
-            coord = entity.position.to_tuple()
-            new_position_map.setdefault(coord, []).append(entity_id)
-
-        object.__setattr__(self, "position_map", new_position_map)
-
-    def _copy_position_map(self) -> dict[Coordinate, list[EntityId]]:
-        return {k: list(v) for k, v in self.position_map.items()}
-
-    def _create_board(
+    def __init__(
         self,
-        entities: dict[EntityId, GameEntity],
-        position_map: dict[Coordinate, list[EntityId]],
+        width: int,
+        height: int,
+        entities: dict[EntityId, GameEntity] | None = None,
+        position_map: dict[Coordinate, list[EntityId]] | None = None,
         player_id: EntityId | None = None,
-    ) -> "Board":
-        return Board(
-            width=self.width,
-            height=self.height,
-            entities=entities,
-            position_map=position_map,
-            player_id=player_id or self.player_id,
-        )
+    ) -> None:
+        self.width = width
+        self.height = height
+        self.entities = entities or {}
+        self.player_id = player_id
+
+        if position_map is not None:
+            self.position_map = position_map
+        else:
+            new_position_map: dict[Coordinate, list[EntityId]] = {}
+            for entity_id, entity in self.entities.items():
+                coord = entity.position.to_tuple()
+                new_position_map.setdefault(coord, []).append(entity_id)
+            self.position_map = new_position_map
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Board":
@@ -127,52 +116,24 @@ class Board:
             return entity
         return None
 
-
     def is_within_bounds(self, position: Position) -> bool:
         return 0 <= position.x < self.width and 0 <= position.y < self.height
-
-    def update_entity(self, entity: GameEntity) -> "Board":
-        new_entities = dict(self.entities)
-
-        old_entity = new_entities.get(entity.entity_id)
-        new_position_map = self._copy_position_map()
-
-        if old_entity is not None:
-            old_coord = old_entity.position.to_tuple()
-            if old_coord in new_position_map:
-                new_position_map[old_coord].remove(entity.entity_id)
-
-        new_entities[entity.entity_id] = entity
-        new_position_map.setdefault(entity.position.to_tuple(), []).append(
+    
+    def add_entity(self, entity: GameEntity) -> "Board":
+        self.entities[entity.entity_id] = entity
+        self.position_map.setdefault(entity.position.to_tuple(), []).append(
             entity.entity_id
         )
-
-        return self._create_board(new_entities, new_position_map)
-
     def remove_entity(self, entity_id: EntityId) -> "Board":
-        if entity_id not in self.entities:
-            return self
-
         entity = self.entities[entity_id]
-        new_entities = {eid: e for eid, e in self.entities.items() if eid != entity_id}
-        new_position_map = self._copy_position_map()
+        self.entities.pop(entity_id)
 
         coord = entity.position.to_tuple()
-        if coord in new_position_map:
-            new_position_map[coord].remove(entity_id)
+        self.position_map[coord].remove(entity_id)
 
-        return self._create_board(new_entities, new_position_map)
-
-    def add_entity(self, entity: GameEntity) -> "Board":
-        new_entities = dict(self.entities)
-        new_position_map = self._copy_position_map()
-
-        new_entities[entity.entity_id] = entity
-        new_position_map.setdefault(entity.position.to_tuple(), []).append(
-            entity.entity_id
-        )
-
-        return self._create_board(new_entities, new_position_map)
+    def update_entity(self, entity: GameEntity) -> "Board":
+        self.remove_entity(entity.entity_id)
+        self.add_entity(entity)
 
     def get_entities_by_type(self, entity_type: EntityType) -> list[GameEntity]:
         return [e for e in self.entities.values() if e.entity_type == entity_type]
@@ -180,8 +141,6 @@ class Board:
     def apply_move(self, player: Player, direction: Direction) -> "Board":
         target_pos = player.position.move(direction.dx, direction.dy)
         entities_at_target = self.get_entities_at(target_pos)
-
-        board = self
 
         if entities_at_target is None or len(entities_at_target) == 0:
             pass  
@@ -193,15 +152,15 @@ class Board:
                     break
             if box is not None:
                 box_target = target_pos.move(direction.dx, direction.dy)
-                entity_behind_box = board.get_entities_at(box_target)
+                entity_behind_box = self.get_entities_at(box_target)
 
                 if entity_behind_box is not None:
                     for ent in entity_behind_box:
                         if ent.entity_type in FLUID_ENTITIES:
-                            board = board.remove_entity(ent.entity_id)
+                            self.remove_entity(ent.entity_id)
 
-                moved_box = entities_at_target[0].move_to(box_target)
-                board = board.update_entity(moved_box)
+                moved_box = box.move_to(box_target)
+                self.update_entity(moved_box)
 
             orb = None
             for entOrb in entities_at_target:
@@ -210,12 +169,11 @@ class Board:
                     break
             if orb is not None:
                 player = player.collect_orb(orb.entity_id)
-                board = board.remove_entity(orb.entity_id)
+                self.remove_entity(orb.entity_id)
 
         moved_player = player.move_to(target_pos)
-        board = board.update_entity(moved_player)
+        self.update_entity(moved_player)
 
-        return board
 
     def tick_TIMED_DOORs(self) -> "Board":
         from core.observer import Observer

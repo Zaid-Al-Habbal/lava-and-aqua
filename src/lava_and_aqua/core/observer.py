@@ -32,7 +32,6 @@ class Observer:
 
     @staticmethod
     def can_push_box(board: Board, box: GameEntity, direction: Direction) -> bool:
-
         target_pos = box.position.move(direction.dx, direction.dy)
 
         if not board.is_within_bounds(target_pos):
@@ -57,15 +56,13 @@ class Observer:
 
     @staticmethod
     def tick_timed_doors(board: Board) -> Board:
-        board_state = board
-        doors = board_state.get_entities_by_type(EntityType.TIMED_DOOR)
+        doors = board.get_entities_by_type(EntityType.TIMED_DOOR)
         for entity in doors:
             updated_entity = entity.tick()
             if updated_entity is None:
-                board_state = board_state.remove_entity(entity.entity_id)
+                board.remove_entity(entity.entity_id)
             else:
-                board_state = board_state.update_entity(updated_entity)
-        return board_state
+                board.update_entity(updated_entity)
     
     @staticmethod
     def player_is_on_lava(board: Board, player: Player) -> bool:
@@ -87,15 +84,13 @@ class Observer:
         board_state = board
         next_id = max(board_state.entities.keys(), default=EntityId(-1)) + 1
 
-        board_state, next_id = Observer._spread_fluid(
+        next_id = Observer._spread_fluid(
             board_state, EntityType.WATER, EntityType.LAVA, next_id
         )
 
-        board_state, next_id = Observer._spread_fluid(
+        next_id =Observer._spread_fluid(
             board_state, EntityType.LAVA, EntityType.WATER, next_id
         )
-
-        return board_state
 
     @staticmethod
     def _spread_fluid(
@@ -104,19 +99,18 @@ class Observer:
         collision_fluid: EntityType,
         next_id: int,
     ) -> tuple[Board, int]:
-        board_state = board
         positions_to_make_walls: set[Position] = set()
         new_fluid_positions: set[Position] = set()
 
-        fluid_entities = board_state.get_entities_by_type(fluid_type)
+        fluid_entities = board.get_entities_by_type(fluid_type)
 
         for fluid in fluid_entities:
             for direction in Direction:
                 new_pos = fluid.position.move(direction.dx, direction.dy)
-                if not board_state.is_within_bounds(new_pos):
+                if not board.is_within_bounds(new_pos):
                     continue
 
-                entities_at_new = board_state.get_entities_at(new_pos)
+                entities_at_new = board.get_entities_at(new_pos)
                 if not entities_at_new:
                     new_fluid_positions.add(new_pos)
                     continue
@@ -136,16 +130,16 @@ class Observer:
         for pos in new_fluid_positions:
             fluid_entity = Entity(EntityId(next_id), fluid_type, pos)
             next_id += 1
-            board_state = board_state.add_entity(fluid_entity)
+            board.add_entity(fluid_entity)
 
         for pos in positions_to_make_walls:
-            existings = board_state.get_entities_at(pos)
+            existings = board.get_entities_at(pos)
             for existing in existings:
                 if existing is not None:
-                    board_state = board_state.remove_entity(existing.entity_id)
+                    board.remove_entity(existing.entity_id)
 
             wall = Entity(EntityId(next_id), EntityType.WALL, pos)
             next_id += 1
-            board_state = board_state.add_entity(wall)
+            board.add_entity(wall)
 
-        return board_state, next_id
+        return next_id
