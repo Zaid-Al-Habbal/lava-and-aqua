@@ -55,7 +55,7 @@ class Observer:
 
 
     @staticmethod
-    def tick_timed_doors(board: Board) -> Board:
+    def tick_timed_doors(board: Board) -> None:
         doors = board.get_entities_by_type(EntityType.TIMED_DOOR)
         for entity in doors:
             updated_entity = entity.tick()
@@ -80,7 +80,7 @@ class Observer:
         return len(player.collected_orbs) == total_orbs_count and len(all_orbs) == 0
 
     @staticmethod
-    def spread_lava_and_water(board: Board) -> Board:
+    def spread_lava_and_water(board: Board) -> None:
         board_state = board
         next_id = max(board_state.entities.keys(), default=EntityId(-1)) + 1
 
@@ -98,7 +98,7 @@ class Observer:
         fluid_type: EntityType,
         collision_fluid: EntityType,
         next_id: int,
-    ) -> tuple[Board, int]:
+    ) -> int:
         positions_to_make_walls: set[Position] = set()
         new_fluid_positions: set[Position] = set()
 

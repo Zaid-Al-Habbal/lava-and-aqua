@@ -119,26 +119,26 @@ class Board:
     def is_within_bounds(self, position: Position) -> bool:
         return 0 <= position.x < self.width and 0 <= position.y < self.height
     
-    def add_entity(self, entity: GameEntity) -> "Board":
+    def add_entity(self, entity: GameEntity) -> None:
         self.entities[entity.entity_id] = entity
         self.position_map.setdefault(entity.position.to_tuple(), []).append(
             entity.entity_id
         )
-    def remove_entity(self, entity_id: EntityId) -> "Board":
+    def remove_entity(self, entity_id: EntityId) -> None:
         entity = self.entities[entity_id]
         self.entities.pop(entity_id)
 
         coord = entity.position.to_tuple()
         self.position_map[coord].remove(entity_id)
 
-    def update_entity(self, entity: GameEntity) -> "Board":
+    def update_entity(self, entity: GameEntity) -> None:
         self.remove_entity(entity.entity_id)
         self.add_entity(entity)
 
     def get_entities_by_type(self, entity_type: EntityType) -> list[GameEntity]:
         return [e for e in self.entities.values() if e.entity_type == entity_type]
     
-    def apply_move(self, player: Player, direction: Direction) -> "Board":
+    def apply_move(self, player: Player, direction: Direction) -> None:
         target_pos = player.position.move(direction.dx, direction.dy)
         entities_at_target = self.get_entities_at(target_pos)
 
@@ -175,12 +175,12 @@ class Board:
         self.update_entity(moved_player)
 
 
-    def tick_TIMED_DOORs(self) -> "Board":
+    def tick_TIMED_DOORs(self) -> None:
         from core.observer import Observer
 
         return Observer.tick_timed_doors(self)
 
-    def spread_lava_and_water(self) -> "Board":
+    def spread_lava_and_water(self) -> None:
         from core.observer import Observer
 
         return Observer.spread_lava_and_water(self)

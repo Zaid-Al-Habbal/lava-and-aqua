@@ -53,7 +53,7 @@ def interactive_demo() -> None:
     while True:
         print()
         print()
-        print("You Available actions:",
+        print("Available actions:",
             ", ".join([action.direction.name for action in game_state.get_available_actions()]))    
         command = input("\nEnter command: ").strip().lower()
         if command == "q":

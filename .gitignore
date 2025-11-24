@@ -3,3 +3,4 @@ plan.md
 __pychache__/
 *.pyc
 .env
+.zencoder
