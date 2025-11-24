@@ -9,6 +9,8 @@ class Observer:
 
     @staticmethod
     def can_move(board: Board, player: Player, direction: Direction) -> bool:
+        if player is None:
+            return False
         target_pos = player.position.move(direction.dx, direction.dy)
 
         if not board.is_within_bounds(target_pos):
