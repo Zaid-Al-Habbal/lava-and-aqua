@@ -153,7 +153,6 @@ class Board:
             if box is not None:
                 box_target = target_pos.move(direction.dx, direction.dy)
                 entity_behind_box = self.get_entities_at(box_target)
-                print(entity_behind_box)
 
                 if entity_behind_box is not None:
                     for ent in entity_behind_box:

@@ -30,10 +30,8 @@ class GameEngine:
             return True
 
         player = board.get_player()
-        if player is None:
-            return False
-
-        if Observer.player_is_on_lava(board, player):
+    
+        if player is None or Observer.player_is_on_lava(board, player):
             return True
 
         for ent in board.get_entities_at(player.position):

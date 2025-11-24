@@ -51,14 +51,15 @@ class GameState:
 
         if GameEngine.is_won(self.board, self.phase):
             self.phase = GamePhase.WON
-        elif GameEngine.is_lost(self.board, self.phase):
-            self.phase = GamePhase.LOST
         
         self.board.spread_lava_and_water()
         self.board.tick_TIMED_DOORs()
 
         self.move_history.append(action)
         self.move_count += 1
+        
+        if self.phase is not GamePhase.WON and GameEngine.is_lost(self.board, self.phase):
+            self.phase = GamePhase.LOST
         
         return GameState(
             board=dc(self.board), phase=dc(self.phase), move_count=dc(self.move_count), move_history=dc(self.move_history)
