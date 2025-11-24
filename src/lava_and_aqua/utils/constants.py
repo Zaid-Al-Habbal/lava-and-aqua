@@ -20,9 +20,8 @@ SOLID_OBSTACLES = {
 
 FLUID_ENTITIES = {EntityType.LAVA, EntityType.WATER}
 
-PASSABLE_WITH_FLUID = {
-    EntityType.PLAYER,
-    EntityType.GOAL,
-    EntityType.PORTAL_ORB,
-    EntityType.CRACKED_WALL,
+NOT_PASSABLE_WITH_FLUID = {
+    EntityType.WALL,
+    EntityType.TIMED_DOOR,
+    EntityType.METAL_BOX,
 }

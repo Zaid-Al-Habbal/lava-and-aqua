@@ -36,19 +36,17 @@ class Direction(Enum):
 
 class EntityType(Enum):
     """Types of entities in the game."""
-
-    PLAYER = "player"
-    LAVA = "lava"
-    WATER = "water"
-    METAL_BOX = "metal_box"
-    TIMED_DOOR = "timed_door"  # Green blocks with countdown
-    CRACKED_WALL = "cracked_wall"  # Blue corner blocks - passable by lava/water
-    PORTAL_ORB = "portal_orb"  # Purple dots that must be collected
-    WALL = "wall"
-    GOAL = "goal"  # Purple portal exit
-    EMPTY = "empty"  # For empty cells
-
-
+    PLAYER = "Player"
+    LAVA = "Lava"
+    WATER = "Water"
+    METAL_BOX = "MetalBox"
+    TIMED_DOOR = "TimedDoor"  
+    CRACKED_WALL = "CrackedWall"
+    PORTAL_ORB = "Orb"
+    WALL = "Wall"
+    GOAL = "Goal"  
+    EMPTY = "Empty"  
+    
 class GamePhase(Enum):
     """Game state phases."""
 

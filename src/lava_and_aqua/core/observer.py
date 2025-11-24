@@ -2,7 +2,7 @@ from core.board import Board
 from core.entitiy import Entity, GameEntity, Player, Position
 from core.action import MoveAction
 from utils.types import EntityType, EntityId, Direction
-from utils.constants import SOLID_OBSTACLES, BLOCKING_ENTITIES, PASSABLE_WITH_FLUID
+from utils.constants import SOLID_OBSTACLES, BLOCKING_ENTITIES, NOT_PASSABLE_WITH_FLUID
 
 
 class Observer:
@@ -119,15 +119,21 @@ class Observer:
 
                 entity_types = [e.entity_type for e in entities_at_new]
 
-                if fluid_type in entity_types:
+                if collision_fluid in entity_types:
+                    positions_to_make_walls.add(new_pos)
                     continue
 
-                for ent in entities_at_new:
-                    if ent.entity_type == collision_fluid:
-                        positions_to_make_walls.add(new_pos)
+                if fluid_type in entity_types:
+                    continue
+                
+                can_spread = True
+                for typ in entity_types:
+                    if typ in NOT_PASSABLE_WITH_FLUID:
+                        can_spread = False
                         break
-                    elif ent.entity_type in PASSABLE_WITH_FLUID:
-                        new_fluid_positions.add(new_pos)
+                
+                if can_spread:
+                    new_fluid_positions.add(new_pos)
 
         for pos in new_fluid_positions:
             fluid_entity = Entity(EntityId(next_id), fluid_type, pos)
