@@ -74,17 +74,10 @@ class GameState:
     def __hash__(self) -> int:
         board_hash = hash(
             (
-                self.board.width,
-                self.board.height,
-                tuple(sorted(self.board.entities.keys())),
-                tuple(
-                    (pos, tuple(sorted(ents)))
-                    for pos, ents in sorted(self.board.position_map.items())
-                ),
-                self.board.player_id,
+                tuple(sorted(self.board.entities.items())),
             )
         )
-        return hash((board_hash, self.phase, self.move_count))
+        return hash((board_hash, self.move_count))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
