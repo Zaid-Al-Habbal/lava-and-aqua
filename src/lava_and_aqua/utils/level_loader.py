@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -34,11 +35,19 @@ class LevelLoader:
         
         return data
 
-    @staticmethod
-    def save_level(level_data: dict[str, Any], level_path: Path | str) -> None:
-        
-        path = Path(level_path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(level_data, f, indent=2)
+    def choose_level() -> str:
+        levels_dir = "levels"
+        level_files = [f for f in os.listdir(levels_dir) if f.endswith(".json")]
+        if not level_files:
+            print("No level files found in levels/")
+            return None
+        print("Available levels:")
+        for idx, fname in enumerate(level_files):
+            print(f"  {idx + 1}. {fname}")
+        while True:
+            choice = input("Choose a level by number: ").strip()
+            if choice.isdigit():
+                idx = int(choice) - 1
+                if 0 <= idx < len(level_files):
+                    return os.path.join(levels_dir, level_files[idx])
+            print("Invalid choice. Try again.")

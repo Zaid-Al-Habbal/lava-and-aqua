@@ -3,7 +3,6 @@ from typing import Any
 from core.action import MoveAction
 from utils.types import GamePhase
 from core.board import Board
-from core.entitiy import Player
 from core.engine import GameEngine
 
 class GameState:
@@ -12,21 +11,16 @@ class GameState:
         self,
         board: Board,
         phase: GamePhase = GamePhase.PLAYING,
-        move_history: list[MoveAction] | None = None,
         move_count: int = 0,
     ):
         self.board = board
         self.phase = phase
-        self.move_history = move_history if move_history is not None else []
         self.move_count = move_count
 
     @classmethod
     def from_level_data(cls, level_data: dict[str, Any]) -> "GameState":
-        board = Board.from_dict(level_data)
-        return cls(board=board, move_history=[])
-
-    def get_player(self) -> Player | None:
-        return self.board.get_player()
+        board = GameEngine.create_board_from_dict(level_data)
+        return cls(board=board)
 
     def is_terminal(self) -> bool:
         return GameEngine.is_terminal(self.phase)
@@ -44,29 +38,27 @@ class GameState:
         return GameEngine.get_available_actions(self.board, self.phase)
 
     def update_state(self, action: MoveAction) -> "GameState":
+        player = GameEngine.get_player(self.board)
 
-        player = self.board.get_player()
-
-        self.board.apply_move(player, action.direction)
+        GameEngine.apply_move(self.board, player, action.direction)
 
         if GameEngine.is_won(self.board, self.phase):
             self.phase = GamePhase.WON
         
-        self.board.spread_lava_and_water()
-        self.board.tick_TIMED_DOORs()
+        GameEngine.spread_lava_and_water(self.board)
+        GameEngine.tick_TIMED_DOORs(self.board)
 
-        self.move_history.append(action)
         self.move_count += 1
         
         if self.phase is not GamePhase.WON and GameEngine.is_lost(self.board, self.phase):
             self.phase = GamePhase.LOST
         
         return GameState(
-            board=dc(self.board), phase=dc(self.phase), move_count=dc(self.move_count), move_history=dc(self.move_history)
+            board=dc(self.board), phase=dc(self.phase), move_count=dc(self.move_count)
         )
 
     def __str__(self) -> str:
-        player = self.get_player()
+        player = GameEngine.get_player(self.board)
         player_info = "No player"
         if player:
             player_info = f"Player at ({player.position.x}, {player.position.y})"

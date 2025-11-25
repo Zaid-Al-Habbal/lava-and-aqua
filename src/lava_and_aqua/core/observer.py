@@ -52,7 +52,9 @@ class Observer:
 
     @staticmethod
     def is_valid_action(board: Board, action: MoveAction) -> bool:
-        player = board.get_player()
+        from core.engine import GameEngine
+
+        player = GameEngine.get_player(board)
         return Observer.can_move(board, player, action.direction)
 
 
