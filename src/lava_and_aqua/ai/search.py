@@ -50,7 +50,7 @@ class SearchAlgorithm:
 
         return
 
-    def dfs2(self, problem, limit=100):
+    def dfs2(self, problem, limit=80):
         
         frontier = deque([Node(problem.initial)])
         
@@ -72,5 +72,28 @@ class SearchAlgorithm:
             for child in node.expand(self.problem):
                 frontier.append(child)
 
-                    
+    def bfs(self, problem, limit=200):
+        
+        node = Node(problem.initial)
+        
+        frontier = deque([node])
+        
+        while frontier:
+            node = frontier.pop()
+            if node.state.phase == GamePhase.WON:
+                self.solution = node
+                return
+            if node.state.phase == GamePhase.LOST or len(node) > limit:
+                continue
+
+            hashed_state = node.state.__hash__()
+            if hashed_state in self.visited:
+                continue
+            
+            self.visited.add(hashed_state)
+            self.num_of_visited_nodes += 1
+
+            for child in node.expand(problem):
+                frontier.appendleft(child)
+        return 
         

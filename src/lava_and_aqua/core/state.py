@@ -1,8 +1,10 @@
 from typing import Any
+import xxhash
 from core.action import MoveAction
 from utils.types import GamePhase, EntityType
 from core.board import Board
 from core.engine import GameEngine
+
 
 class GameState:
     
@@ -12,11 +14,13 @@ class GameState:
         phase: GamePhase = GamePhase.PLAYING,
         move_count: int = 0,
         player=None,
+        _cached_hash: int = None  # NEW: Cache hash value
     ):
         self.board = board
         self.phase = phase
         self.move_count = move_count
         self._player_cache = player
+        self._cached_hash = _cached_hash  # Cache the hash
 
     @classmethod
     def from_level_data(cls, level_data: dict[str, Any]) -> "GameState":
@@ -40,18 +44,15 @@ class GameState:
         return GameEngine.get_available_actions(self.board, self.phase)
 
     def update_state(self, action: MoveAction) -> "GameState":
-        # Copy board BEFORE mutating to avoid modifying the original
         new_board = self.board.copy()
         new_phase = self.phase
         new_move_count = self.move_count + 1
         
         player = GameEngine.get_player(new_board)
-
         GameEngine.apply_move(new_board, player, action.direction)
 
         if GameEngine.is_won(new_board, new_phase):
             new_phase = GamePhase.WON
-        
         
         GameEngine.spread_lava_and_water(new_board)
         GameEngine.tick_TIMED_DOORs(new_board)
@@ -61,7 +62,11 @@ class GameState:
         
         next_player = GameEngine.get_player(new_board)
         return GameState(
-            board=new_board, phase=new_phase, move_count=new_move_count, player=next_player
+            board=new_board, 
+            phase=new_phase, 
+            move_count=new_move_count, 
+            player=next_player,
+            _cached_hash=None  # Will be computed on first __hash__() call
         )
 
     def __str__(self) -> str:
@@ -79,18 +84,36 @@ class GameState:
         )
 
     def __hash__(self) -> int:
-        entity_data = []
-        for eid, ent in sorted(self.board.entities.items()):  # Sort by ID for determinism
-            data = (eid, ent.position.to_tuple(), ent.entity_type)
-            # Add entity-specific attributes if they exist
-            if hasattr(ent, 'collected_orbs'):
-                data = (*data, tuple(sorted(ent.collected_orbs)))  # Sort for consistency
-            elif hasattr(ent, 'remaining_time'):
-                data = (*data, ent.remaining_time)
-            entity_data.append(data)
         
-        board_hash = hash((tuple(entity_data), self.board.player_id))
-        return hash((board_hash, self.move_count))
+        if self._cached_hash is not None:
+            return self._cached_hash
+        
+        hasher = xxhash.xxh64()
+
+        def update_int(value: int, size: int = 8) -> None:
+            hasher.update(int(value).to_bytes(size, "little", signed=True))
+
+        # Encode move count
+        update_int(self.move_count)
+
+        # Encode entities in deterministic order
+        for eid, ent in sorted(self.board.entities.items()):
+            update_int(eid)
+            update_int(ent.position.x, size=4)
+            update_int(ent.position.y, size=4)
+            hasher.update(ent.entity_type.value.encode("utf-8"))
+
+            if hasattr(ent, "collected_orbs"):
+                collected = tuple(sorted(int(orb_id) for orb_id in ent.collected_orbs))
+                update_int(len(collected), size=4)
+                for orb_id in collected:
+                    update_int(orb_id)
+            elif hasattr(ent, "remaining_time"):
+                update_int(ent.remaining_time, size=4)
+
+        # Cache the computed hash
+        self._cached_hash = hasher.intdigest()
+        return self._cached_hash
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
