@@ -1,3 +1,6 @@
+import time
+from pyfiglet import Figlet
+
 from ai.node import Node
 from ai.search import SearchAlgorithm
 from ai.problem import LavaAndAquaProblem
@@ -5,25 +8,45 @@ from core.state import GameState
 from utils.rendering import print_board
 from utils.level_loader import LevelLoader
 from play import interactive_demo
-import time
+
+
+def game_start():
+    print("\n" + "=" * 100)
+    fig = Figlet(font='standard')
+    print(fig.renderText('Lava & Aqua'))
+    print("=" * 100)
+    print()
+    level_path = LevelLoader.choose_level()
+    if not level_path:
+        print("No level selected. Exiting.")
+        return
+    level_data = LevelLoader.load_level(level_path)
+    return level_data
 
 if __name__ == "__main__":
-    # Run the demos
-    # interactive_demo()
-    level_path = LevelLoader.choose_level()
-    level_data = LevelLoader.load_level(level_path)
+    level_data = game_start()
     initial_state = GameState.from_level_data(level_data)
-    problem = LavaAndAquaProblem(initial_state)
-    search = SearchAlgorithm(problem)
-    start_time = time.perf_counter()
-    search.dfs(node=Node(state=initial_state))
-    end_time = time.perf_counter()
-    duration = end_time - start_time
-    if search.solution is not None:
-        for state in search.solution.path_states():
-            print()
-            print_board(state)
-        print(f"Duration: {duration} seconds")
-        print(f"Number of visited nodes: {search.num_of_visited_nodes}")
-    else:
-        print("No solution found")
+    print_board(initial_state)
+    while True:
+        print("Game Modes:\n 1. User Play\n 2. DFS Play\n 3. DFS2 Play")
+        command = input("\nEnter command: ").strip().lower()
+        if command == "1":
+            interactive_demo(initial_state, level_data)
+            break
+        else:
+            problem = LavaAndAquaProblem(initial_state)
+            search = SearchAlgorithm(problem)
+            search.start_time = time.perf_counter()
+            if command == "2":
+                search.dfs(Node(initial_state))
+            elif command == "3":
+                search.dfs2(problem)
+            else:
+                print("invalid command")
+                continue
+
+            search.end_time = time.perf_counter()
+            search.print_search_details() 
+            break   
+
+

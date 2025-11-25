@@ -1,8 +1,4 @@
 from collections import deque
-from copy import deepcopy
-
-from core.engine import GameEngine
-
 
 class Node:
     def __init__(self, state, parent=None, action=None):
@@ -17,7 +13,8 @@ class Node:
         s = self.state
         sons = deque()
         for action in problem.actions(s):
-            s1 = problem.result(deepcopy(s), action)
+            # No need to deepcopy - update_state now handles copying internally
+            s1 = problem.result(s, action)
             sons.append(Node(s1, self, action))
         return sons
             
@@ -32,12 +29,5 @@ class Node:
             return []
         return self.parent.path_states() + [self.state]
     
-    def is_cycle(self, k=30):
-        "Does this player path form a cycle of length k or less?"
-        def find_cycle(ancestor, k):
-            return (ancestor is not None and k > 0 and k % 2 == 0 and
-                    (GameEngine.get_player(ancestor.state.board).position == GameEngine.get_player(self.state.board).position or find_cycle(ancestor.parent, k - 1)))
-        return find_cycle(self.parent, k)
-
 
     

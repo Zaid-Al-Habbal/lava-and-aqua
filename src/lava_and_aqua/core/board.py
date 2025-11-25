@@ -57,4 +57,24 @@ class Board:
     def get_entities_by_type(self, entity_type: EntityType) -> list[GameEntity]:
         return [e for e in self.entities.values() if e.entity_type == entity_type]
     
+    def copy(self) -> "Board":
+        """Create a shallow copy of the board. Entities are immutable, so we can reuse them."""
+        return Board(
+            width=self.width,
+            height=self.height,
+            entities=self.entities.copy(),  # Shallow copy dict (entities are immutable)
+            position_map={coord: ids.copy() for coord, ids in self.position_map.items()},  # Copy lists in position_map
+            player_id=self.player_id,
+        )
     
+    def has_entity_of_type(self, entity_type: EntityType) -> bool:
+        """Check if the board currently holds at least one entity of the given type."""
+        return any(e.entity_type == entity_type for e in self.entities.values())
+
+    def has_any_entity_of_types(self, entity_types: tuple[EntityType, ...]) -> bool:
+        """Fast check for whether any of the requested entity types exist on the board."""
+        if not entity_types:
+            return False
+        type_set = set(entity_types)
+        return any(e.entity_type in type_set for e in self.entities.values())
+     

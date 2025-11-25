@@ -4,31 +4,17 @@ from core.state import GameState
 from core.action import MoveAction
 from core.game_manager import GameManager
 from utils.types import Direction
-from utils.level_loader import LevelLoader
 from utils.rendering import print_board
-from pyfiglet import Figlet
 
-def interactive_demo() -> None:
-    print("\n" + "=" * 100)
-    fig = Figlet(font='standard')
-    print(fig.renderText('Lava & Aqua'))
-    print("=" * 100)
-    print()
-    level_path = LevelLoader.choose_level()
-    if not level_path:
-        print("No level selected. Exiting.")
-        return
-    level_data = LevelLoader.load_level(level_path)
-    initial_state = GameState.from_level_data(level_data)
+def interactive_demo(initial_state, level_data) -> None:
+    
     game_state = initial_state
     GameManager.add_state(initial_state)
-    print(f"Loaded level: {level_path}")
     print("  w/a/s/d - Move up/left/down/right")
     print("  r - Reset level")
     print("  u - Undo last move")
     print("  q - Exit demo")
     print()
-    print_board(game_state)
     while True:
         print()
         print()
