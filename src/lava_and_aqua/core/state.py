@@ -1,3 +1,4 @@
+import struct
 from typing import Any
 import xxhash
 from core.action import MoveAction
@@ -84,36 +85,55 @@ class GameState:
         )
 
     def __hash__(self) -> int:
-        
         if self._cached_hash is not None:
             return self._cached_hash
-        
+
         hasher = xxhash.xxh64()
 
-        def update_int(value: int, size: int = 8) -> None:
-            hasher.update(int(value).to_bytes(size, "little", signed=True))
-
-        # Encode entities in deterministic order
-        for eid, ent in sorted(self.board.entities.items()):
-            # update_int(eid)
-            update_int(ent.position.x, size=4)
-            update_int(ent.position.y, size=4)
-            hasher.update(ent.entity_type.value.encode("utf-8"))
-
-
+        position_to_entities: dict[tuple[int, int], list[tuple[str, Any]]] = {}
+        
+        for ent in self.board.entities.values():
+            pos = (ent.position.x, ent.position.y)
+            entity_type = ent.entity_type.value
+            
+            # Collect extra data for special entities
+            extra_data = None
             if hasattr(ent, "collected_orbs"):
-                collected = tuple(sorted(int(orb_id) for orb_id in ent.collected_orbs))
-                update_int(len(collected), size=4)
-                for orb_id in collected:
-                    update_int(orb_id)
+                extra_data = tuple(sorted(int(x) for x in ent.collected_orbs))
             elif hasattr(ent, "remaining_time"):
-                update_int(ent.remaining_time, size=4)
+                extra_data = ent.remaining_time
+            
+            if pos not in position_to_entities:
+                position_to_entities[pos] = []
+            
+            position_to_entities[pos].append((entity_type, extra_data))
+        
+        # Sort positions for deterministic hashing
+        sorted_positions = sorted(position_to_entities.items())
+        
+        hasher.update(struct.pack("<i", len(sorted_positions)))
+        
+        for pos, entities_at_pos in sorted_positions:
+            hasher.update(struct.pack("<ii", pos[0], pos[1]))
+            
+            entities_at_pos.sort()
+            
+            hasher.update(struct.pack("<i", len(entities_at_pos)))
+            
+            for entity_type, extra_data in entities_at_pos:
+                hasher.update(entity_type.encode("utf-8"))
+                
+                if extra_data is not None:
+                    if isinstance(extra_data, tuple):
+                        hasher.update(struct.pack("<i", len(extra_data)))
+                        for orb in extra_data:
+                            hasher.update(struct.pack("<i", orb))
+                    elif isinstance(extra_data, int):
+                        hasher.update(struct.pack("<i", extra_data))
 
-        # Cache the computed hash
         self._cached_hash = hasher.intdigest()
-
         return self._cached_hash
-
+    
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, GameState):
             return False
