@@ -29,7 +29,7 @@ class SearchAlgorithm:
 
         # print_board(node.state)
         
-        if self.solution or depth_limit <= 0 or node.state.phase == GamePhase.LOST:
+        if self.solution or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
             return
                
         if node.state.phase == GamePhase.WON:
@@ -42,11 +42,9 @@ class SearchAlgorithm:
         
         self.visited.add(hashed_state)
         self.num_of_visited_nodes += 1
-    
-        depth_limit -= 1
 
         for child in node.expand(self.problem):
-            self.dfs(child, depth_limit)
+            self.dfs(child)
             if self.solution:
                 break   # Stop searching if a solution is found
             del child
@@ -62,7 +60,7 @@ class SearchAlgorithm:
             if node.state.phase == GamePhase.WON:
                 self.solution = node
                 return
-            if len(node) >= limit or node.state.phase == GamePhase.LOST:
+            if node.path_cost > limit or node.state.phase == GamePhase.LOST:
                 continue
 
             hashed_state = node.state.__hash__()
@@ -75,7 +73,7 @@ class SearchAlgorithm:
             for child in node.expand(self.problem):
                 frontier.append(child)
 
-    def bfs(self, problem, limit=200):
+    def bfs(self, problem, limit=80):
         
         node = Node(problem.initial)
         
@@ -86,7 +84,7 @@ class SearchAlgorithm:
             if node.state.phase == GamePhase.WON:
                 self.solution = node
                 return
-            if node.state.phase == GamePhase.LOST or len(node) > limit:
+            if node.state.phase == GamePhase.LOST or node.path_cost > limit:
                 continue
 
             hashed_state = node.state.__hash__()

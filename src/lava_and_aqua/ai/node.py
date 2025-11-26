@@ -1,8 +1,8 @@
 from collections import deque
 
 class Node:
-    def __init__(self, state, parent=None, action=None):
-        self.__dict__.update(state=state, parent=parent, action=action)
+    def __init__(self, state, parent=None, action=None, path_cost=1):
+        self.__dict__.update(state=state, parent=parent, action=action, path_cost=path_cost)
 
     def __repr__(self): return '<{}>'.format(self.state)
     def __len__(self): return 0 if self.parent is None else (1 + len(self.parent))
@@ -15,7 +15,7 @@ class Node:
         for action in problem.actions(s):
             # No need to deepcopy - update_state now handles copying internally
             s1 = problem.result(s, action)
-            sons.append(Node(s1, self, action))
+            sons.append(Node(s1, self, action, self.path_cost + 1))
         return sons
             
 

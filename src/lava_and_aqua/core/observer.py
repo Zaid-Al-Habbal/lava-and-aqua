@@ -1,5 +1,5 @@
 from core.board import Board
-from core.entitiy import Entity, GameEntity, Player, Position
+from core.entitiy import Entity, GameEntity, Orb, Player, Position
 from core.action import MoveAction
 from utils.types import EntityType, EntityId, Direction
 from utils.constants import SOLID_OBSTACLES, BLOCKING_ENTITIES, NOT_PASSABLE_WITH_FLUID
@@ -145,7 +145,7 @@ class Observer:
         for pos in positions_to_make_walls:
             existings = board.get_entities_at(pos)
             for existing in existings:
-                if existing is not None:
+                if existing is not None and not isinstance(existing, Orb):
                     board.remove_entity(existing.entity_id)
 
             wall = Entity(EntityId(next_id), EntityType.WALL, pos)

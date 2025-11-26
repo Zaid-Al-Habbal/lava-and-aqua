@@ -1,4 +1,5 @@
 from typing import Any
+from utils.rendering import render_grid_state
 import xxhash
 from core.action import MoveAction
 from utils.types import GamePhase, EntityType
@@ -94,7 +95,7 @@ class GameState:
             hasher.update(int(value).to_bytes(size, "little", signed=True))
 
         # Encode move count
-        update_int(self.move_count)
+        # update_int(self.move_count)
 
         # Encode entities in deterministic order
         for eid, ent in sorted(self.board.entities.items()):
@@ -113,7 +114,8 @@ class GameState:
 
         # Cache the computed hash
         self._cached_hash = hasher.intdigest()
-        # self._cached_hash = hash((self.board, self.move_count))
+        # grid = render_grid_state(self.board, self.board.position_map, self.board.entities)
+        # self._cached_hash = hash((grid_, self.move_count))
 
         return self._cached_hash
 
