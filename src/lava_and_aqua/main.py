@@ -21,15 +21,15 @@ def game_start():
         print("No level selected. Exiting.")
         return
     level_data = LevelLoader.load_level(level_path)
-    return level_data
+    return level_data, level_path
 
 
 if __name__ == "__main__":
-    level_data = game_start()
+    level_data, level_path = game_start()
     initial_state = GameState.from_level_data(level_data)
     print_board(initial_state)
     while True:
-        print("Game Modes:\n 1. User Play\n 2. DFS Play\n 3. DFS2 Play\n 4. BFS Play")
+        print("Game Modes:\n 1. User Play\n 2. DFS Recursive Play\n 3. DFS Iterative Play\n 4. BFS Play")
         command = input("\nEnter command: ").strip().lower()
         if command == "1":
             interactive_demo(initial_state, level_data)
@@ -40,11 +40,11 @@ if __name__ == "__main__":
             search.start_time = time.perf_counter()
             algorithm_name = None
             if command == "2":
-                search.dfs(Node(initial_state))
-                algorithm_name = "DFS"
+                search.dfs_rec(Node(initial_state))
+                algorithm_name = "DFS Recrusive"
             elif command == "3":
-                search.dfs2(problem)
-                algorithm_name = "DFS2"
+                search.dfs_iter(problem)
+                algorithm_name = "DFS Iterative"
             elif command == "4":
                 search.bfs(problem)
                 algorithm_name = "BFS"
@@ -54,6 +54,7 @@ if __name__ == "__main__":
 
             search.end_time = time.perf_counter()
             search.print_search_details(algorithm_name) 
+            search.save_search_details_to_csv(algorithm_name, level_path[7:-5])
             break   
 
 

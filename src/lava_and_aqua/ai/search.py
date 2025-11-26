@@ -1,4 +1,6 @@
 from collections import deque
+import csv
+import os
 from ai.node import Node
 from utils.types import GamePhase
 from utils.rendering import print_board
@@ -27,7 +29,46 @@ class SearchAlgorithm:
         else:
             print("No solution found")
 
-    def dfs2(self, problem, limit=80):
+    def save_search_details_to_csv(self, algorithm_name, game_level):
+        if self.solution is None:
+            return
+        
+        duration = self.end_time - self.start_time
+        csv_file_path = f"statistics/{algorithm_name}.csv"
+        
+        # Check if file exists to determine if we need to write headers
+        file_exists = os.path.exists(csv_file_path)
+        
+        with open(csv_file_path, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            
+            # Write headers if file is new
+            if not file_exists:
+                writer.writerow(['Duration', 'Number of visited nodes', 'number of moves', 'game_level'])
+            
+            # Write the data
+            writer.writerow([duration, self.num_of_visited_nodes, self.solution.path_cost, game_level])
+
+    def dfs_rec(self, node, depth_limit=200):
+        if self.solution is not None or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
+            return
+        
+        if node.state.phase == GamePhase.WON:
+            self.solution = node
+            return
+        
+        hashed_state = node.state.__hash__()
+        if hashed_state in self.visited:
+            return 
+        self.visited.add(hashed_state)
+        self.num_of_visited_nodes += 1
+
+        for child in node.expand(self.problem):
+            self.dfs_rec(child)
+            if self.solution:
+                break
+            del child
+    def dfs_iter(self, problem, limit=200):
         
         frontier = deque([Node(problem.initial)])
         
@@ -72,23 +113,3 @@ class SearchAlgorithm:
                 frontier.appendleft(child)
         return 
         
-
-    def dfs(self, node, depth_limit=200):
-        if self.solution is not None or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
-            return
-        
-        if node.state.phase == GamePhase.WON:
-            self.solution = node
-            return
-        
-        hashed_state = node.state.__hash__()
-        if hashed_state in self.visited:
-            return 
-        self.visited.add(hashed_state)
-        self.num_of_visited_nodes += 1
-
-        for child in node.expand(self.problem):
-            self.dfs(child)
-            if self.solution:
-                break
-            del child
