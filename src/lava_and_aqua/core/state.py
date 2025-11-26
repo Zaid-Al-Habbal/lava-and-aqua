@@ -1,8 +1,7 @@
 from typing import Any
-from utils.rendering import render_grid_state
 import xxhash
 from core.action import MoveAction
-from utils.types import GamePhase, EntityType
+from utils.types import GamePhase
 from core.board import Board
 from core.engine import GameEngine
 
@@ -94,11 +93,9 @@ class GameState:
         def update_int(value: int, size: int = 8) -> None:
             hasher.update(int(value).to_bytes(size, "little", signed=True))
 
-        # Encode move count
-        # update_int(self.move_count)
-
         # Encode entities in deterministic order
         for eid, ent in sorted(self.board.entities.items()):
+            # update_int(eid)
             update_int(ent.position.x, size=4)
             update_int(ent.position.y, size=4)
             hasher.update(ent.entity_type.value.encode("utf-8"))
@@ -107,15 +104,13 @@ class GameState:
             if hasattr(ent, "collected_orbs"):
                 collected = tuple(sorted(int(orb_id) for orb_id in ent.collected_orbs))
                 update_int(len(collected), size=4)
-                # for orb_id in collected:
-                #     update_int(orb_id)
+                for orb_id in collected:
+                    update_int(orb_id)
             elif hasattr(ent, "remaining_time"):
                 update_int(ent.remaining_time, size=4)
 
         # Cache the computed hash
         self._cached_hash = hasher.intdigest()
-        # grid = render_grid_state(self.board, self.board.position_map, self.board.entities)
-        # self._cached_hash = hash((grid_, self.move_count))
 
         return self._cached_hash
 

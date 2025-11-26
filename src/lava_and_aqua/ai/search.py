@@ -27,32 +27,6 @@ class SearchAlgorithm:
         else:
             print("No solution found")
 
-    def dfs(self, node, depth_limit=200):
-
-        # print_board(node.state)
-        
-        if self.solution or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
-            return
-               
-        if node.state.phase == GamePhase.WON:
-            self.solution = node
-            return
-    
-        hashed_state = node.state.__hash__()
-        if hashed_state in self.visited:
-            return
-        
-        self.visited.add(hashed_state)
-        self.num_of_visited_nodes += 1
-
-        for child in node.expand(self.problem):
-            self.dfs(child)
-            if self.solution:
-                break   
-            del child
-        
-        return
-
     def dfs2(self, problem, limit=80):
         
         frontier = deque([Node(problem.initial)])
@@ -76,13 +50,11 @@ class SearchAlgorithm:
                 frontier.append(child)
 
     def bfs(self, problem, limit=200):
-        
-
         frontier = deque([Node(problem.initial)])
         
         while frontier:
             node = frontier.pop()
-            print_board(node.state)
+            # print_board(node.state)
             if node.state.phase == GamePhase.WON:
                 self.solution = node
                 return
@@ -100,3 +72,23 @@ class SearchAlgorithm:
                 frontier.appendleft(child)
         return 
         
+
+    def dfs(self, node, depth_limit=200):
+        if self.solution is not None or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
+            return
+        
+        if node.state.phase == GamePhase.WON:
+            self.solution = node
+            return
+        
+        hashed_state = node.state.__hash__()
+        if hashed_state in self.visited:
+            return 
+        self.visited.add(hashed_state)
+        self.num_of_visited_nodes += 1
+
+        for child in node.expand(self.problem):
+            self.dfs(child)
+            if self.solution:
+                break
+            del child
