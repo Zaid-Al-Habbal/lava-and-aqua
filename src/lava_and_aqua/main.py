@@ -38,18 +38,22 @@ if __name__ == "__main__":
             problem = LavaAndAquaProblem(initial_state)
             search = SearchAlgorithm(problem)
             search.start_time = time.perf_counter()
+            algorithm_name = None
             if command == "2":
                 search.dfs(Node(initial_state))
+                algorithm_name = "DFS"
             elif command == "3":
                 search.dfs2(problem)
+                algorithm_name = "DFS2"
             elif command == "4":
                 search.bfs(problem)
+                algorithm_name = "BFS"
             else:
                 print("invalid command")
                 continue
 
             search.end_time = time.perf_counter()
-            search.print_search_details() 
+            search.print_search_details(algorithm_name) 
             break   
 
 

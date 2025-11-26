@@ -14,19 +14,20 @@ class SearchAlgorithm:
         self.start_time = None
         self.end_time = None
 
-    def print_search_details(self):
+    def print_search_details(self, algorithm_name):
         if self.solution is not None:
             duration = self.end_time - self.start_time
             for state in self.solution.path_states():
                 print()
                 print_board(state)
+            print(f"{algorithm_name} Statistics:\n")
             print(f"Duration: {duration} seconds")
             print(f"Number of visited nodes: {self.num_of_visited_nodes}")
             print(f"Num of moves: {self.solution.path_cost}")
         else:
             print("No solution found")
 
-    def dfs(self, node, depth_limit=80):
+    def dfs(self, node, depth_limit=200):
 
         # print_board(node.state)
         
@@ -74,12 +75,14 @@ class SearchAlgorithm:
             for child in node.expand(self.problem):
                 frontier.append(child)
 
-    def bfs(self, problem, limit=80):
+    def bfs(self, problem, limit=200):
         
-        frontier = deque([Node(problem.initial)], 200)
+
+        frontier = deque([Node(problem.initial)])
         
         while frontier:
             node = frontier.pop()
+            print_board(node.state)
             if node.state.phase == GamePhase.WON:
                 self.solution = node
                 return
