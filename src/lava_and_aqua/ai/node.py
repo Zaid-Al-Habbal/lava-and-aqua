@@ -1,7 +1,7 @@
 from collections import deque
 
 class Node:
-    def __init__(self, state, parent=None, action=None, path_cost=1):
+    def __init__(self, state, parent=None, action=None, path_cost=0):
         self.__dict__.update(state=state, parent=parent, action=action, path_cost=path_cost)
 
     def __repr__(self): return '<{}>'.format(self.state)

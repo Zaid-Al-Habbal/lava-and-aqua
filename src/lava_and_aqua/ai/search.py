@@ -22,6 +22,7 @@ class SearchAlgorithm:
                 print_board(state)
             print(f"Duration: {duration} seconds")
             print(f"Number of visited nodes: {self.num_of_visited_nodes}")
+            print(f"Num of moves: {self.solution.path_cost}")
         else:
             print("No solution found")
 
@@ -46,7 +47,7 @@ class SearchAlgorithm:
         for child in node.expand(self.problem):
             self.dfs(child)
             if self.solution:
-                break   # Stop searching if a solution is found
+                break   
             del child
         
         return
@@ -75,9 +76,7 @@ class SearchAlgorithm:
 
     def bfs(self, problem, limit=80):
         
-        node = Node(problem.initial)
-        
-        frontier = deque([node])
+        frontier = deque([Node(problem.initial)], 200)
         
         while frontier:
             node = frontier.pop()
