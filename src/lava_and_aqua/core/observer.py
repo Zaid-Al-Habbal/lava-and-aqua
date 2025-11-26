@@ -71,7 +71,7 @@ class Observer:
     @staticmethod
     def player_is_on_lava(board: Board, player: Player) -> bool:
         entities_at_player = board.get_entities_at(player.position)
-        return entities_at_player is not None and EntityType.LAVA in list(
+        return EntityType.LAVA in list(
             ent.entity_type for ent in entities_at_player
         )
 

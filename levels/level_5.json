@@ -1,0 +1,60 @@
+{
+  "width": 14,
+  "height": 9,
+  "entities": {
+    "players": [
+      { "position": [1, 7] }
+    ],
+    "metal_boxes": [
+      { "position": [5, 5] }
+    ],
+    "walls": [
+      {"position": [12, 2]},
+      {"position": [13, 1]},
+      {"position": [12, 1]},
+      {"position": [11, 1]},
+      {"position": [10, 1]},
+      {"position": [9, 1]},
+      {"position": [8, 1]},
+      {"position": [7, 1]},
+      {"position": [6, 1]},
+      {"position": [4, 6]},
+      {"position": [3, 6]},
+      {"position": [3, 7]},
+      {"position": [3, 8]}, 
+
+      {"position": [6, 6]},
+      {"position": [7, 6]},
+      {"position": [7, 7]},
+      {"position": [7, 8]}
+        
+
+    ],
+    "goals": [
+        {"position": [13, 2]}
+    ],
+    "lavas": [
+        {"position": [10, 0]}
+    ],
+    "waters": [
+      {"position": [5, 6]},
+      {"position": [5, 7]},
+      {"position": [5, 8]},
+
+      {"position": [4, 7]},
+      {"position": [4, 8]},
+
+      {"position": [6, 7]},
+      {"position": [6, 8]}
+    ],
+    "portal_orbs": [
+      
+    ],
+    "cracked_walls": [
+        
+    ],
+    "timed_doors": [
+        
+    ]
+  }
+}

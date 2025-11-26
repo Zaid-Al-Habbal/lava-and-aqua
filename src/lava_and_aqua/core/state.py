@@ -52,12 +52,12 @@ class GameState:
         GameEngine.apply_move(new_board, player, action.direction)
 
         if GameEngine.is_won(new_board, new_phase):
-            new_phase = GamePhase.WON
+            new_phase = GamePhase.WON  
         
         GameEngine.spread_lava_and_water(new_board)
         GameEngine.tick_TIMED_DOORs(new_board)
 
-        if new_phase is not GamePhase.WON and GameEngine.is_lost(new_board, new_phase):
+        if GameEngine.is_lost(new_board, new_phase) and new_phase != GamePhase.WON:
             new_phase = GamePhase.LOST
         
         next_player = GameEngine.get_player(new_board)
@@ -98,21 +98,23 @@ class GameState:
 
         # Encode entities in deterministic order
         for eid, ent in sorted(self.board.entities.items()):
-            update_int(eid)
             update_int(ent.position.x, size=4)
             update_int(ent.position.y, size=4)
             hasher.update(ent.entity_type.value.encode("utf-8"))
 
+
             if hasattr(ent, "collected_orbs"):
                 collected = tuple(sorted(int(orb_id) for orb_id in ent.collected_orbs))
                 update_int(len(collected), size=4)
-                for orb_id in collected:
-                    update_int(orb_id)
+                # for orb_id in collected:
+                #     update_int(orb_id)
             elif hasattr(ent, "remaining_time"):
                 update_int(ent.remaining_time, size=4)
 
         # Cache the computed hash
         self._cached_hash = hasher.intdigest()
+        # self._cached_hash = hash((self.board, self.move_count))
+
         return self._cached_hash
 
     def __eq__(self, other: object) -> bool:

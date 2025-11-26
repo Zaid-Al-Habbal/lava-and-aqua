@@ -26,6 +26,8 @@ class SearchAlgorithm:
             print("No solution found")
 
     def dfs(self, node, depth_limit=80):
+
+        # print_board(node.state)
         
         if self.solution or depth_limit <= 0 or node.state.phase == GamePhase.LOST:
             return
@@ -47,7 +49,8 @@ class SearchAlgorithm:
             self.dfs(child, depth_limit)
             if self.solution:
                 break   # Stop searching if a solution is found
-
+            del child
+        
         return
 
     def dfs2(self, problem, limit=80):

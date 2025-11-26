@@ -3,7 +3,7 @@ from core.board import Board
 from core.action import MoveAction
 from core.observer import Observer
 from utils.constants import FLUID_ENTITIES
-from utils.types import Coordinate, EntityId, GamePhase, Direction
+from utils.types import Coordinate, EntityId, EntityType, GamePhase, Direction
 from core.entitiy import (
     CrackedWall,
     Lava,
@@ -44,6 +44,15 @@ class GameEngine:
         player = GameEngine.get_player(board)
     
         if player is None or Observer.player_is_on_lava(board, player):
+            return True
+
+        goal_ent = board.get_entities_by_type(EntityType.GOAL)
+        if len(goal_ent) == 0:
+            return True
+        
+        if EntityType.LAVA in list(
+            ent.entity_type for ent in board.get_entities_at(goal_ent[0].position)
+        ):
             return True
 
         for ent in board.get_entities_at(player.position):
