@@ -12,6 +12,7 @@ class SearchAlgorithm:
         self.problem = problem
         self.solution = None
         self.num_of_visited_nodes = 0
+        self.num_of_created_nodes = 1
         self.visited = set()
         self.start_time = None
         self.end_time = None
@@ -24,6 +25,7 @@ class SearchAlgorithm:
                 print_board(state)
             print(f"{algorithm_name} Statistics:\n")
             print(f"Duration: {duration} seconds")
+            print(f"Number of created nodes: {self.num_of_created_nodes}")
             print(f"Number of visited nodes: {self.num_of_visited_nodes}")
             print(f"Num of moves: {self.solution.path_cost}")
         else:
@@ -44,10 +46,10 @@ class SearchAlgorithm:
             
             # Write headers if file is new
             if not file_exists:
-                writer.writerow(['Duration', 'Number of visited nodes', 'number of moves', 'game_level'])
+                writer.writerow(['Duration', 'Number of created nodes', 'Number of visited nodes', 'number of moves', 'game_level'])
             
             # Write the data
-            writer.writerow([duration, self.num_of_visited_nodes, self.solution.path_cost, game_level])
+            writer.writerow([duration, self.num_of_created_nodes, self.num_of_visited_nodes, self.solution.path_cost, game_level])
 
     def dfs_rec(self, node, depth_limit=200):
         if self.solution is not None or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
@@ -62,12 +64,14 @@ class SearchAlgorithm:
             return 
         self.visited.add(hashed_state)
         self.num_of_visited_nodes += 1
+        self.num_of_created_nodes += len(node.expand(self.problem))
 
         for child in node.expand(self.problem):
             self.dfs_rec(child)
             if self.solution:
                 break
             del child
+    
     def dfs_iter(self, problem, limit=200):
         
         frontier = deque([Node(problem.initial)])
@@ -89,6 +93,7 @@ class SearchAlgorithm:
 
             for child in node.expand(self.problem):
                 frontier.append(child)
+                self.num_of_created_nodes += 1
 
     def bfs(self, problem, limit=200):
         frontier = deque([Node(problem.initial)])
@@ -111,5 +116,9 @@ class SearchAlgorithm:
 
             for child in node.expand(problem):
                 frontier.appendleft(child)
+                self.num_of_created_nodes += 1
+
         return 
         
+    
+    

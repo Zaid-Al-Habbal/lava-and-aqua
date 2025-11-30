@@ -1,2 +1,6 @@
-Duration,Number of visited nodes,number of moves,game_level
-0.0686339339999904,38,12,level_1
+Duration,Number of created nodes,Number of visited nodes,number of moves,game_level
+0.033695750999868324,119,38,12,level_1
+0.3870476189999863,655,176,15,level_4
+126.65554064400021,147862,42752,27,level_7
+30.957404180999674,72992,25165,65,level_9
+66.2873379040002,181931,56209,60,level_10

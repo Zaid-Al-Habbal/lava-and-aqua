@@ -4,3 +4,4 @@ __pychache__/
 *.pyc
 .env
 .zencoder
+*.xlsx

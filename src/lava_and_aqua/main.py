@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
             search.end_time = time.perf_counter()
             search.print_search_details(algorithm_name) 
-            search.save_search_details_to_csv(algorithm_name, level_path[7:-5])
+            # search.save_search_details_to_csv(algorithm_name, level_path[7:-5])
             break   
 
 
