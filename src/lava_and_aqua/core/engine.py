@@ -50,10 +50,10 @@ class GameEngine:
         if len(goal_ent) == 0:
             return True
         
-        if EntityType.LAVA in list(
-            ent.entity_type for ent in board.get_entities_at(goal_ent[0].position)
-        ):
-            return True
+        # if EntityType.LAVA in list(
+        #     ent.entity_type for ent in board.get_entities_at(goal_ent[0].position)
+        # ):
+        #     return True
 
         for ent in board.get_entities_at(player.position):
             if isinstance(ent, Wall):

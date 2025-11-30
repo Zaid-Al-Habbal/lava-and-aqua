@@ -51,8 +51,8 @@ class SearchAlgorithm:
             # Write the data
             writer.writerow([duration, self.num_of_created_nodes, self.num_of_visited_nodes, self.solution.path_cost, game_level])
 
-    def dfs_rec(self, node, depth_limit=200):
-        if self.solution is not None or node.path_cost > depth_limit or node.state.phase == GamePhase.LOST:
+    def dfs_rec(self, node):
+        if self.solution is not None or node.state.phase == GamePhase.LOST:
             return
         
         if node.state.phase == GamePhase.WON:
@@ -95,7 +95,7 @@ class SearchAlgorithm:
                 frontier.append(child)
                 self.num_of_created_nodes += 1
 
-    def bfs(self, problem, limit=200):
+    def bfs(self, problem):
         frontier = deque([Node(problem.initial)])
         
         while frontier:
@@ -104,7 +104,7 @@ class SearchAlgorithm:
             if node.state.phase == GamePhase.WON:
                 self.solution = node
                 return
-            if node.state.phase == GamePhase.LOST or node.path_cost > limit:
+            if node.state.phase == GamePhase.LOST:
                 continue
 
             hashed_state = node.state.__hash__()
