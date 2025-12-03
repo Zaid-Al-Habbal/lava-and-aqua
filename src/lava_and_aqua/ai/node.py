@@ -1,5 +1,7 @@
 from collections import deque
 
+from utils.types import EntityType
+
 class Node:
     def __init__(self, state, parent=None, action=None, path_cost=0):
         self.__dict__.update(state=state, parent=parent, action=action, path_cost=path_cost)
@@ -30,4 +32,6 @@ class Node:
         return self.parent.path_states() + [self.state]
     
 
+    def ucs_cost(self):
+        return len(self.state.board.get_entities_by_type(EntityType.LAVA))
     
