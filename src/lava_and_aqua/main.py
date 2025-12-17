@@ -10,10 +10,11 @@ from ai.node import Node
 
 from pyfiglet import Figlet
 
+
 def game_start():
     print("\n" + "=" * 100)
-    fig = Figlet(font='standard')
-    print(fig.renderText('Lava & Aqua'))
+    fig = Figlet(font="standard")
+    print(fig.renderText("Lava & Aqua"))
     print("=" * 100)
     print()
     level_path = LevelLoader.choose_level()
@@ -29,7 +30,9 @@ def main():
     initial_state = GameState.from_level_data(level_data)
     print_board(initial_state)
     while True:
-        print("Game Modes:\n 1. User Play\n 2. DFS Play\n 3. BFS Play\n 4. UCS Play\n")
+        print(
+            "Game Modes:\n 1. User Play\n 2. DFS Play\n 3. BFS Play\n 4. UCS Play\n 5. Hill climbing Backtrack Play\n 6. A* Play"
+        )
         command = input("\nEnter command: ").strip().lower()
         if command == "1":
             interactive_demo(initial_state, level_data)
@@ -48,17 +51,21 @@ def main():
             elif command == "4":
                 search.ucs(Node(initial_state))
                 algorithm_name = "UCS"
+            elif command == "5":
+                search.hill_climbing_backtrack(Node(initial_state))
+                algorithm_name = "Hill Climbing Backtrack"
+            elif command == "6":
+                search.a_star(Node(initial_state))
+                algorithm_name = "A*"
             else:
                 print("invalid command")
                 continue
 
             search.end_time = time.perf_counter()
-            search.print_search_details(algorithm_name) 
+            search.print_search_details(algorithm_name)
             # search.save_search_details_to_csv(algorithm_name, level_path[7:-5])
-            break   
+            break
 
 
 if __name__ == "__main__":
     main()
-
-

@@ -1,5 +1,6 @@
 from collections import deque
 
+from core.entitiy import Position
 from utils.types import EntityType
 
 class Node:
@@ -35,3 +36,12 @@ class Node:
     def ucs_cost(self):
         return len(self.state.board.get_entities_by_type(EntityType.LAVA))
     
+
+    # goal_list = node.state.board.get_entities_by_type(EntityType.GOAL)
+    #         if len(goal_list) > 0:
+    #             print(f"distance to goal: {node.distance_to_the_goal(goal_list[0].position)}")
+    def distance_to_the_goal(self, goal_pos : tuple[int, int]) -> int:
+        player_pos = self.state.get_player().position.to_tuple()
+        px, py = player_pos
+        gx, gy = goal_pos
+        return abs(px - gx) + abs(py - gy)
