@@ -56,14 +56,16 @@ class SearchAlgorithm:
 
 
     def dfs(self, node : Node) -> None:
-        if self.solution is not None or node.state.phase == GamePhase.LOST:
+        # check end game
+        if node.state.phase == GamePhase.LOST:
             return
         
         if node.state.phase == GamePhase.WON:
             self.solution = node
             return
         
-        hashed_state = node.state.__hash__()
+        #check if state is visited previously
+        hashed_state = hash(node.state)
         if hashed_state in self.visited:
             return 
         
@@ -89,7 +91,7 @@ class SearchAlgorithm:
             if node.state.phase == GamePhase.LOST:
                 continue
 
-            hashed_state = node.state.__hash__()
+            hashed_state = hash(node.state)
             if hashed_state in self.visited:
                 continue
             
@@ -102,10 +104,10 @@ class SearchAlgorithm:
         return 
     
     
-    def ucs(self, start_node: Node):
+    def ucs(self, start_node: Node) -> None:
 
         frontier = PriorityQueue([])
-        hashed_start_state = start_node.state.__hash__()
+        hashed_start_state = hash(start_node.state)
         frontier.add((start_node.ucs_cost(), hashed_start_state, start_node))
         self.dis[hashed_start_state] = start_node.ucs_cost()
         
@@ -119,8 +121,10 @@ class SearchAlgorithm:
                 self.solution = node
                 return
             
+            self.num_of_created_nodes += 1
+
             for child in node.expand(self.problem):
-                hashed_child_state = child.state.__hash__()
+                hashed_child_state = hash(child.state)
                 child_cost = child.ucs_cost()
 
                 if hashed_child_state not in self.dis.keys() or self.dis[hashed_child_state] > cost + child_cost:
