@@ -3,7 +3,6 @@ import csv
 import os
 from ai.node import Node
 from ai.priority_queue import PriorityQueue
-from core.entitiy import Position
 from utils.types import EntityType, GamePhase
 from utils.rendering import print_board
 from .problem import Problem

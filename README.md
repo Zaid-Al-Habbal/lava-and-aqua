@@ -8,7 +8,7 @@
 
 ```
 
-A Python-based puzzle game engine featuring classic **Lava & Aqua** mechanics. Navigate a grid-based board, collect portal orbs, reach goal positions, and outsmart spreading lava and water hazards.
+A Python-based puzzle game engine featuring classic **Lava & Aqua** mechanics with AI search algorithms can play the game.
 
 ## Quick Start
 
@@ -50,23 +50,31 @@ lava-and-aqua/
 │   ├── core/                    # Game engine and state management
 │   │   ├── state.py            # Immutable GameState container
 │   │   ├── board.py            # Board representation and entity management
-│   │   ├── entities.py         # Game entity definitions
-│   │   ├── actions.py          # Movement action system
+│   │   ├── entitiy.py          # Game entity definitions
+│   │   ├── action.py           # Movement action system
 │   │   ├── engine.py           # GameEngine state transitions
-│   │   ├── evaluator.py        # Win/loss condition evaluation
-│   │   ├── observers.py        # Observer pattern for game mechanics
+│   │   ├── observer.py         # Observer pattern for game mechanics
 │   │   └── game_manager.py     # Game session and history management
+│   ├── ai/                      # AI solvers and search algorithms
+│   │   ├── search.py           # Search algorithm implementations (DFS, BFS, UCS, Hill Climbing, A*)
+│   │   ├── problem.py          # Problem definition for AI and search
+│   │   ├── node.py             # Node and state representations for search trees
+│   │   └── priority_queue.py   # Priority queue implementation for informed search
 │   ├── utils/
 │   │   ├── types.py            # Type definitions and enums
 │   │   ├── constants.py        # Game constants and obstacle definitions
 │   │   ├── level_loader.py     # JSON level file loading
 │   │   └── rendering.py        # ASCII emoji board rendering
-│   ├── config.py               # Global configuration
-│   └── main.py                 # Interactive demo entry point
+│   ├── main.py                 # Interactive demo entry point
+│   └── play.py                 # Game play entry point
 ├── levels/                      # JSON-based level definitions
 │   ├── level_1.json
 │   ├── level_4.json
+│   ├── level_5.json
+│   ├── level_7.json
+│   ├── level_9.json
 │   ├── level_10.json
+│   ├── level_13.json
 │   ├── level_15.json
 │   └── test_level.json
 ├── pyproject.toml              # UV project configuration
@@ -87,7 +95,7 @@ lava-and-aqua/
 
 **2. Separation of Concerns**
 - **State Layer**: `GameState` and `Board` manage data representation
-- **Logic Layer**: `GameEngine`, `GameEvaluator`, `Observer` handle rules and mechanics
+- **Logic Layer**: `GameEngine`, `Observer` handle rules and mechanics
 - **Presentation Layer**: `rendering.py` and `main.py` handle UI
 - **Utility Layer**: `types.py`, `constants.py` provide shared definitions
 
@@ -100,115 +108,6 @@ lava-and-aqua/
 | **Factory** | `Board.from_dict()`, `create_entity_class()` | Creates objects from configuration and generates entity types dynamically |
 | **Facade** | `GameState` and `GameEngine` | Provide unified interface to complex subsystems |
 | **Strategy** | `MoveAction`, pathfinding algorithms | Support different action types and search strategies |
-
----
-
-## 🔗 Class Relationships & Architecture Diagram
-
-### Class Hierarchy
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     GameState (Frozen)                       │
-│              ┌─ Immutable game snapshot                      │
-│              ├─ board: Board                                │
-│              ├─ phase: GamePhase                            │
-│              ├─ move_history: list[MoveAction]              │
-│              └─ move_count: int                             │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ├──────────────┐
-                            │              │
-                    ┌───────▼──────┐   ┌──▼────────┐
-                    │    Board     │   │ GamePhase │
-                    │  (Frozen)    │   │  (Enum)   │
-                    └──────────────┘   └───────────┘
-                            │
-            ┌───────────────┼───────────────┐
-            │               │               │
-        ┌───▼────────┐  ┌──▼────────┐  ┌──▼────────┐
-        │ Entities   │  │ Position  │  │Position   │
-        │ dict       │  │ Mapping   │  │ Map       │
-        └────────────┘  └───────────┘  └───────────┘
-
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Entity Hierarchy                          │
-├─────────────────────────────────────────────────────────────┤
-│ Entity (Base Class - frozen dataclass)                       │
-│ ├─ Player                                                    │
-│ │  └─ collected_orbs: frozenset[EntityId]                   │
-│ ├─ MetalBox        (created via factory)                     │
-│ ├─ Wall            (created via factory)                     │
-│ ├─ Goal            (created via factory)                     │
-│ ├─ Lava            (created via factory)                     │
-│ ├─ Water           (created via factory)                     │
-│ ├─ Orb (PortalOrb) (created via factory)                     │
-│ ├─ CrackedWall     (created via factory)                     │
-│ └─ TimedDoor                                                 │
-│    └─ remaining_time: int                                    │
-└─────────────────────────────────────────────────────────────┘
-
-
-┌─────────────────────────────────────────────────────────────┐
-│                 Game Logic Components                        │
-├─────────────────────────────────────────────────────────────┤
-│ GameEngine                                                   │
-│ ├─ apply_action(board, phase, move_count, action)            │
-│ ├─ apply_move(board, player, direction)                      │
-│ └─ get_available_actions(board, phase)                       │
-│                                                              │
-│ GameEvaluator                                                │
-│ ├─ is_won(board, phase)                                     │
-│ ├─ is_lost(board, phase)                                    │
-│ └─ is_terminal(phase)                                       │
-│                                                              │
-│ Observer                                                     │
-│ ├─ can_move(board, player, direction)                       │
-│ ├─ spread_lava_and_water(board)                             │
-│ ├─ player_is_on_lava(board, player)                         │
-│ └─ has_collected_all_orbs(board, player)                    │
-│                                                              │
-│ GameManager                                                  │
-│ └─ game_states: deque[GameState]  (for undo/redo)           │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Interaction Flow
-
-```
-main.py
-  │
-  ├─ LevelLoader.load_level() ──→ JSON file
-  │
-  ├─ GameState.from_level_data() ──→ Board
-  │
-  ├─ GameManager.add_state()
-  │
-  └─ Game Loop:
-     │
-     ├─ User Input ──→ MoveAction
-     │
-     ├─ GameState.is_valid_action()
-     │   └─ GameEngine.is_valid_action()
-     │      └─ Observer.can_move()
-     │
-     ├─ GameState.update_state()
-     │   └─ GameEngine.apply_action()
-     │      ├─ board.apply_move()
-     │      │  ├─ Collision detection
-     │      │  ├─ Orb collection
-     │      │  └─ Metal box pushing
-     │      ├─ board.spread_lava_and_water()
-     │      ├─ boardtick_TIMED_DOORs()
-     │      └─ GameEvaluator.is_terminal
-     │
-     ├─ GameManager.add_state() (history)
-     │
-     ├─ print_board() ──→ Render to console
-     │
-     └─ Check win/loss conditions
-```
 
 ---
 
@@ -267,147 +166,137 @@ Two-phase fluid spreading that occurs **after each player move**:
 
 ---
 
-## 📋 Level File Format
+## 🤖 AI Algorithms
 
-Levels are defined in **JSON format** with entity positioning:
+The project implements several search algorithms to automatically solve puzzle levels. All algorithms are implemented in the `ai/` directory and use a unified problem-solving framework.
 
-```json
-{
-  "width": 14,
-  "height": 6,
-  "entities": {
-    "players": [
-      { "position": [1, 1] }
-    ],
-    "metal_boxes": [
-      { "position": [5, 3] },
-      { "position": [7, 2] }
-    ],
-    "walls": [
-      { "position": [13, 0] },
-      { "position": [0, 5] }
-    ],
-    "goals": [
-      { "position": [13, 1] }
-    ],
-    "lavas": [
-      { "position": [3, 5] },
-      { "position": [11, 4] }
-    ],
-    "waters": [
-      { "position": [2, 2] }
-    ],
-    "portal_orbs": [
-      { "position": [6, 2] },
-      { "position": [10, 3] }
-    ],
-    "cracked_walls": [
-      { "position": [5, 5] }
-    ],
-    "timed_doors": [
-      { "position": [8, 4], "timer": 10 }
-    ]
-  }
-}
+### Architecture
+
+The AI system follows a standard problem-solving agent architecture:
+
+```
+Problem (Abstract Interface)
+  └─ LavaAndAquaProblem
+      ├─ actions(state) → list[MoveAction]
+      ├─ result(state, action) → GameState
+      └─ is_over(state) → bool
+
+Node (Search Node)
+  ├─ state: GameState
+  ├─ parent: Node | None
+  ├─ action: MoveAction | None
+  ├─ path_cost: int
+  ├─ expand(problem) → list[Node]
+  ├─ path_actions() → list[MoveAction]
+  ├─ path_states() → list[GameState]
+  ├─ ucs_cost() → int
+  └─ distance_to_the_goal(goal_pos) → int
+
+SearchAlgorithm
+  ├─ problem: Problem
+  ├─ solution: Node | None
+  ├─ visited: set[int] (hashed states)
+  ├─ num_of_created_nodes: int
+  └─ search methods (dfs, bfs, ucs, hill_climbing_backtrack, a_star)
 ```
 
-## 🔧 Core Components Reference
+### Implemented Algorithms
 
-### GameState (`core/state.py`)
-**Immutable frozen dataclass representing a game snapshot**
+#### 1. **Depth-First Search (DFS)**
+- **Type**: Uninformed search
+- **Strategy**: Explores as deep as possible before backtracking
+- **Implementation**: Recursive DFS with visited state tracking
+- **Characteristics**:
+  - Memory efficient (O(bm) where b=branching factor, m=max depth)
+  - Not optimal (may find suboptimal solutions)
+  - Not complete (can get stuck in infinite loops without proper cycle detection)
+- **Use Case**: Quick exploration for simple levels
 
-```python
-GameState(
-    board: Board,
-    phase: GamePhase,
-    move_history: list[MoveAction],
-    move_count: int
-)
-```
+#### 2. **Breadth-First Search (BFS)**
+- **Type**: Uninformed search
+- **Strategy**: Explores all nodes at current depth before moving to next level
+- **Implementation**: Uses `deque` for FIFO frontier management
+- **Characteristics**:
+  - Complete (finds solution if one exists)
+  - Optimal for unweighted graphs (finds shortest path in terms of moves)
+  - Memory intensive (O(b^d) where d=depth of solution)
+- **Use Case**: Finding shortest solution paths
 
-**Key Methods**:
-- `from_level_data()`: Create initial state from JSON
-- `is_valid_action()`: Validate move possibility
-- `update_state()`: Apply action and return new GameState
-- `get_available_actions()`: List all valid moves
-- `is_won()`, `is_lost()`: Check terminal conditions
+#### 3. **Uniform Cost Search (UCS)**
+- **Type**: Informed search (cost-based)
+- **Strategy**: Expands nodes with lowest path cost first
+- **Implementation**: Uses priority queue ordered by cumulative path cost
+- **Cost Function**: `ucs_cost() = number of lava entities on board`
+- **Characteristics**:
+  - Optimal (finds least-cost solution)
+  - Complete (if solution exists)
+  - Explores states with less lava first
+- **Use Case**: Minimizing hazards in solution path
 
-### Board (`core/board.py`)
-**Manages entity grid with efficient position lookup**
+#### 4. **Hill Climbing with Backtracking**
+- **Type**: Local search with backtracking
+- **Strategy**: Greedily moves toward goal, backtracks when stuck
+- **Heuristic**: Manhattan distance to goal position
+- **Implementation**: 
+  - Prioritizes children by distance to goal
+  - Recursively explores best options first
+  - Backtracks when no solution found
+- **Characteristics**:
+  - Memory efficient (explores one path at a time)
+  - Can get stuck in local optima
+  - Fast for well-structured problems
+- **Use Case**: Quick solutions when goal is reachable
 
-```python
-Board(
-    width: int,
-    height: int,
-    entities: dict[EntityId, GameEntity],
-    position_map: dict[Coordinate, list[EntityId]],
-    player_id: EntityId
-)
-```
+#### 5. **A* (A-Star)**
+- **Type**: Informed search (heuristic-based)
+- **Strategy**: Combines path cost (g) and heuristic estimate (h) to guide search
+- **Evaluation Function**: `f(n) = g(n) + h(n)`
+  - `g(n)`: Number of moves from start (path cost)
+  - `h(n)`: Manhattan distance to goal (heuristic)
+- **Implementation**: Priority queue ordered by `f(n) = cost + distance_to_goal`
+- **Characteristics**:
+  - Optimal (if heuristic is admissible)
+  - Complete (if solution exists)
+  - Efficient (explores fewer nodes than BFS/UCS)
+- **Use Case**: Best balance of optimality and efficiency
 
-**Key Methods**:
-- `from_dict()`: Create from level JSON
-- `get_entities_at(position)`: O(1) position lookup
-- `update_entity()`, `remove_entity()`, `add_entity()`: Immutable updates
-- `get_player()`: Retrieve player entity
-- `spread_lava_and_water()`: Trigger fluid mechanics
-- `tick_TIMED_DOORs()`: Update door timers
+### Key Components
 
-### Entity & Subclasses (`core/entities.py`)
+#### Node Class (`ai/node.py`)
+Represents a search node in the state space:
+- **State**: Current `GameState` snapshot
+- **Parent**: Reference to parent node (for path reconstruction)
+- **Action**: The action that led to this state
+- **Path Cost**: Cumulative cost from start
+- **Methods**:
+  - `expand(problem)`: Generates child nodes for all valid actions
+  - `path_actions()`: Reconstructs sequence of actions to reach this node
+  - `path_states()`: Reconstructs sequence of states to reach this node
+  - `ucs_cost()`: Returns cost based on lava count
+  - `distance_to_the_goal(goal_pos)`: Manhattan distance heuristic
 
-```python
-# Frozen base class
-Entity(
-    entity_id: EntityId,
-    entity_type: EntityType,
-    position: Position
-)
+#### Problem Class (`ai/problem.py`)
+Defines the problem interface and game-specific implementation:
+- **LavaAndAquaProblem**: Concrete implementation for the game
+  - `actions(state)`: Returns all valid moves from current state
+  - `result(state, action)`: Applies action and returns new state
+  - `is_over(state)`: Checks if state is terminal (won/lost)
 
-# Special subclasses
-Player(collected_orbs: frozenset[EntityId])
-TimedDoor(remaining_time: int)
+#### Priority Queue (`ai/priority_queue.py`)
+Min-heap implementation using Python's `heapq`:
+- Used by UCS, Hill Climbing, and A* algorithms
+- Maintains nodes ordered by evaluation function
 
-# Dynamically generated via factory
-MetalBox, Wall, Goal, Lava, Water, Orb, CrackedWall
-```
 
-### GameEngine (`core/engine.py`)
-**Orchestrates state transitions and applies actions**
+### Algorithm Selection Guide
 
-**Responsibilities**:
-- Validate actions against board state
-- Apply player movement with collision handling
-- Manage metal box pushing
-- Trigger spread mechanics
-- Check terminal conditions
-
-### Observer (`core/observer.py`)
-**Implements game mechanics and collision logic**
-
-**Responsibilities**:
-- Movement validation (`can_move`, `can_push_box`)
-- Fluid spread algorithm
-- Orb collection detection
-- Lava collision detection
-- Timed door countdown
-
-### GameEvaluator (`core/evaluator.py`)
-**Determines win/loss conditions**
-
-```python
-is_won(board, phase) → bool      # All orbs + at goal
-is_lost(board, phase) → bool     # On lava or wall
-is_terminal(phase) → bool        # Game ended
-```
-
-### GameManager (`core/game_manager.py`)
-**Maintains game session history for undo functionality**
-
-```python
-game_states: deque[GameState]
-add_state(state)
-remove_last_state() → GameState
-```
+| Algorithm | Best For | Trade-offs |
+|-----------|----------|------------|
+| **DFS** | Simple levels, memory-constrained | Fast but may find suboptimal solutions |
+| **BFS** | Shortest path guarantee | Memory intensive, slower |
+| **UCS** | Minimizing hazards | Optimal but explores more states |
+| **Hill Climbing** | Quick solutions, clear paths | May get stuck, not optimal |
+| **A*** | Best overall performance | Optimal and efficient with good heuristic |
 
 ---
 
@@ -427,9 +316,7 @@ remove_last_state() → GameState
 | Cracked Wall | 🚧 | Passable to fluids |
 | Timed Door | ⏳ 1️⃣-🔟 | Green timer (10→1 shows countdown) |
 
-
 ---
-
 
 ## 📝 License
 
